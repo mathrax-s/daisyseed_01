@@ -1,5 +1,10 @@
 # daisyseed_01
 
+ArduinoのDaisyDuinoライブラリを使っています。
+
+DaisyDuino
+https://github.com/electro-smith/DaisyDuino
+
 シリアル通信（115200bps）で「z x c b n m , . /」を受信して、ドレミファソラシドを奏でます。
 10コの和音を想定し、オシレータとエンベロープを10コずつ持ち、最後にリバーブをかけています。
 
