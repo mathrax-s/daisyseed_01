@@ -3,16 +3,14 @@
 #define MAXCH 10
 
 DaisyHardware hw;
+
 Oscillator osc[MAXCH];
 AdEnv env[MAXCH];
 ReverbSc verb;
 
-
 uint8_t scale[7] = {0, 2, 4, 5, 7, 9, 11};
 uint8_t keylist[] = {'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/'};
-
 float rawsig, comp_sig, wetvl, wetvr;
-
 uint8_t ch_cnt = 0;
 
 static void audio(float **in, float **out, size_t size) {
@@ -20,7 +18,7 @@ static void audio(float **in, float **out, size_t size) {
   for (size_t i = 0; i < size; i++) {
     // Process
     for (int c = 0; c < MAXCH; c++) {
-      osc[c].SetAmp(env[c].Process()/(MAXCH/4));
+      osc[c].SetAmp(env[c].Process() / (MAXCH / 4));
       rawsig += osc[c].Process() / (size * MAXCH);
     }
     verb.Process(rawsig, rawsig, &wetvl, &wetvr);
@@ -31,7 +29,6 @@ static void audio(float **in, float **out, size_t size) {
 }
 
 void InitSynth(float samplerate) {
-  // Init Osc and Nse
   for (int c = 0; c < MAXCH; c++) {
     osc[c].Init(samplerate);
     osc[c].SetWaveform(Oscillator::WAVE_SIN);
@@ -48,7 +45,6 @@ void InitSynth(float samplerate) {
   verb.Init(samplerate);
   verb.SetFeedback(0.91f);
   verb.SetLpFreq(12000.0f);
-  
 }
 
 void setup() {
