@@ -7,11 +7,11 @@ Oscillator osc[MAXCH];
 AdEnv env[MAXCH];
 ReverbSc verb;
 
-const static float scale[7] = {0, 2, 4, 5, 7, 9, 11};
+
+uint8_t scale[7] = {0, 2, 4, 5, 7, 9, 11};
 uint8_t keylist[] = {'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/'};
 
-static float freq;
-float rawsig, wetvl, wetvr;
+float rawsig, comp_sig, wetvl, wetvr;
 
 uint8_t ch_cnt = 0;
 
@@ -20,7 +20,7 @@ static void audio(float **in, float **out, size_t size) {
   for (size_t i = 0; i < size; i++) {
     // Process
     for (int c = 0; c < MAXCH; c++) {
-      osc[c].SetAmp(env[c].Process() / MAXCH);
+      osc[c].SetAmp(env[c].Process()/(MAXCH/4));
       rawsig += osc[c].Process() / (size * MAXCH);
     }
     verb.Process(rawsig, rawsig, &wetvl, &wetvr);
@@ -45,16 +45,15 @@ void InitSynth(float samplerate) {
     env[c].SetMax(1.f);
     env[c].SetMin(0.f);
   }
-
   verb.Init(samplerate);
   verb.SetFeedback(0.91f);
   verb.SetLpFreq(12000.0f);
+  
 }
 
 void setup() {
   float samplerate, callback_rate;
   hw = DAISY.init(DAISY_POD, AUDIO_SR_48K);
-
   samplerate = DAISY.get_samplerate();
   InitSynth(samplerate);
 
@@ -69,7 +68,7 @@ void loop() {
     uint8_t rcvdata = Serial.read();
     for (int c = 0; c < MAXCH; c++) {
       if (rcvdata == keylist[c]) {
-        freq = mtof(72.0f + scale[c % 7] + (int)(c / 7) * 12);
+        float freq = mtof(72.0f + scale[c % 7] + (int)(c / 7) * 12);
         osc[ch_cnt % MAXCH].SetFreq(freq);
         env[ch_cnt % MAXCH].SetTime(ADENV_SEG_DECAY, 1.0);
         env[ch_cnt % MAXCH].Trigger();
